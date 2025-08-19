@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?application progid="SMath Solver" version="1.3.0.9126"?>
+<worksheet xmlns="http://smath.info/schemas/worksheet/1.0">
+  <settings ppi="120">
+    <identity>
+      <id>5acc29da-20ff-4bbc-bfd9-d4f6c19ca177</id>
+      <revision>2</revision>
+    </identity>
+    <calculation>
+      <precision>4</precision>
+      <exponentialThreshold>5</exponentialThreshold>
+      <trailingZeros>false</trailingZeros>
+      <significantDigitsMode>false</significantDigitsMode>
+      <mixedNumbers>false</mixedNumbers>
+      <roundingMode>0</roundingMode>
+      <approximateEqualAccuracy>3</approximateEqualAccuracy>
+      <fractions>decimal</fractions>
+    </calculation>
+    <pageModel active="false" viewMode="2" printGrid="false" printAreas="true" simpleEqualsOnly="false" printBackgroundImages="true" hideElementsHighlightings="true">
+      <paper id="9" orientation="Portrait" width="827" height="1169" />
+      <margins left="39" right="39" top="49" bottom="49" />
+      <header alignment="Center" color="#a9a9a9">&amp;[DATE] &amp;[TIME] - &amp;[FILENAME]</header>
+      <footer alignment="Center" color="#a9a9a9">&amp;[PAGENUM] / &amp;[COUNT]</footer>
+      <backgrounds />
+    </pageModel>
+    <dependencies>
+      <assembly name="SMath Core" version="1.73.9126.0" guid="a37cba83-b69c-4c71-9992-55ff666763bd" />
+      <assembly name="MathRegion" version="1.73.9126.0" guid="02f1ab51-215b-466e-a74d-5d8b1cf85e8d" />
+    </dependencies>
+  </settings>
+  <regions type="content">
+    <region left="0" top="0" width="141" height="39" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">ρ.fio</e>
+          <e type="operand">1.1</e>
+          <e type="operand">10</e>
+          <e type="operand">6</e>
+          <e type="operator" args="1">-</e>
+          <e type="operator" args="2">^</e>
+          <e type="operator" args="2">*</e>
+          <e type="operand" style="unit">m</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="36" width="125" height="39" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">d.fio</e>
+          <e type="operand">1</e>
+          <e type="operand">10</e>
+          <e type="operand">3</e>
+          <e type="operator" args="1">-</e>
+          <e type="operator" args="2">^</e>
+          <e type="operator" args="2">*</e>
+          <e type="operand" style="unit">m</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="126" top="45" width="85" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">l.fio</e>
+          <e type="operand">10</e>
+          <e type="operand" style="unit">m</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="72" width="255" height="58" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">A.fio</e>
+          <e type="operand">d.fio</e>
+          <e type="operand">2</e>
+          <e type="operator" args="2">/</e>
+          <e type="bracket">(</e>
+          <e type="operand">2</e>
+          <e type="operator" args="2">^</e>
+          <e type="operand">π</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">7.854</e>
+          <e type="operand">10</e>
+          <e type="operand">7</e>
+          <e type="operator" args="1">-</e>
+          <e type="operator" args="2">^</e>
+          <e type="operator" args="2">*</e>
+          <e type="operand" style="unit">m</e>
+          <e type="operand">2</e>
+          <e type="operator" args="2">^</e>
+          <e type="operator" args="2">*</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="126" width="128" height="53" color="#000000" fontSize="10">
+      <math optimize="2">
+        <input>
+          <e type="operand">R.fio</e>
+          <e type="operand">ρ.fio</e>
+          <e type="operand">l.fio</e>
+          <e type="operand">A.fio</e>
+          <e type="operator" args="2">/</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="171" width="123" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">R.fio</e>
+          <e type="operand">14.02</e>
+          <e type="operand" style="unit">ohm</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">≈</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="225" width="74" height="24" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">V</e>
+          <e type="operand">220</e>
+          <e type="operand" style="unit">V</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="243" width="90" height="56" color="#000000" fontSize="10">
+      <math optimize="2">
+        <input>
+          <e type="operand">P.fio</e>
+          <e type="operand">V</e>
+          <e type="operand">2</e>
+          <e type="operator" args="2">^</e>
+          <e type="operand">R.fio</e>
+          <e type="operator" args="2">/</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="90" top="252" width="71" height="47" color="#000000" fontSize="10">
+      <math optimize="2">
+        <input>
+          <e type="operand">I</e>
+          <e type="operand">V</e>
+          <e type="operand">R.fio</e>
+          <e type="operator" args="2">/</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="297" width="123" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">P.fio</e>
+          <e type="operand">3455.75</e>
+          <e type="operand" style="unit">W</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">≈</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="324" width="96" height="24" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">I</e>
+          <e type="operand">15.708</e>
+          <e type="operand" style="unit">A</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">≈</e>
+        </input>
+      </math>
+    </region>
+  </regions>
+</worksheet>

@@ -1,0 +1,345 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?application progid="SMath Solver" version="1.3.0.9126"?>
+<worksheet xmlns="http://smath.info/schemas/worksheet/1.0">
+  <settings ppi="120">
+    <identity>
+      <id>7e57577d-3161-4bce-a607-601a2829d31f</id>
+      <revision>3</revision>
+    </identity>
+    <calculation>
+      <precision>4</precision>
+      <exponentialThreshold>5</exponentialThreshold>
+      <trailingZeros>false</trailingZeros>
+      <significantDigitsMode>false</significantDigitsMode>
+      <mixedNumbers>false</mixedNumbers>
+      <roundingMode>0</roundingMode>
+      <approximateEqualAccuracy>3</approximateEqualAccuracy>
+      <fractions>decimal</fractions>
+    </calculation>
+    <pageModel active="false" viewMode="2" printGrid="false" printAreas="true" simpleEqualsOnly="false" printBackgroundImages="true" hideElementsHighlightings="true">
+      <paper id="9" orientation="Portrait" width="827" height="1169" />
+      <margins left="39" right="39" top="49" bottom="49" />
+      <header alignment="Center" color="#a9a9a9">&amp;[DATE] &amp;[TIME] - &amp;[FILENAME]</header>
+      <footer alignment="Center" color="#a9a9a9">&amp;[PAGENUM] / &amp;[COUNT]</footer>
+      <backgrounds />
+    </pageModel>
+    <dependencies>
+      <assembly name="SMath Core" version="1.73.9126.0" guid="a37cba83-b69c-4c71-9992-55ff666763bd" />
+      <assembly name="MathRegion" version="1.73.9126.0" guid="02f1ab51-215b-466e-a74d-5d8b1cf85e8d" />
+    </dependencies>
+  </settings>
+  <regions type="content">
+    <region left="0" top="0" width="121" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">C.tijolo</e>
+          <e type="operand">140</e>
+          <e type="operand" style="unit">mm</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="36" width="113" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">L.tijolo</e>
+          <e type="operand">90</e>
+          <e type="operand" style="unit">mm</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="72" width="121" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">A.tijolo</e>
+          <e type="operand">190</e>
+          <e type="operand" style="unit">mm</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="108" width="105" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">P.tijolo</e>
+          <e type="operand">3</e>
+          <e type="operand" style="unit">kg</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="135" width="116" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">Q.tijolo</e>
+          <e type="operand">30000</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="162" width="326" height="39" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">V.tijolo</e>
+          <e type="operand">C.tijolo</e>
+          <e type="operand">L.tijolo</e>
+          <e type="operator" args="2">*</e>
+          <e type="operand">A.tijolo</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">0.0024</e>
+          <e type="operand" style="unit">m</e>
+          <e type="operand">3</e>
+          <e type="operator" args="2">^</e>
+          <e type="operator" args="2">*</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="198" width="254" height="39" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">V.total</e>
+          <e type="operand">Q.tijolo</e>
+          <e type="operand">V.tijolo</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">71.82</e>
+          <e type="operand" style="unit">m</e>
+          <e type="operand">3</e>
+          <e type="operator" args="2">^</e>
+          <e type="operator" args="2">*</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="234" width="252" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">P.total</e>
+          <e type="operand">Q.tijolo</e>
+          <e type="operand">P.tijolo</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">90000</e>
+          <e type="operand" style="unit">kg</e>
+          <e type="operator" args="2">*</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="288" width="133" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">C.carrinho</e>
+          <e type="operand">530</e>
+          <e type="operand" style="unit">mm</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="315" width="133" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">L.carrinho</e>
+          <e type="operand">230</e>
+          <e type="operand" style="unit">mm</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="342" width="133" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">A.carrinho</e>
+          <e type="operand">251</e>
+          <e type="operand" style="unit">mm</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="369" width="377" height="39" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">V.carrinho</e>
+          <e type="operand">C.carrinho</e>
+          <e type="operand">L.carrinho</e>
+          <e type="operator" args="2">*</e>
+          <e type="operand">A.carrinho</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">0.0306</e>
+          <e type="operand" style="unit">m</e>
+          <e type="operand">3</e>
+          <e type="operator" args="2">^</e>
+          <e type="operator" args="2">*</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="405" width="184" height="53" color="#000000" fontSize="10">
+      <math decimalPlaces="1">
+        <input>
+          <e type="operand">α</e>
+          <e type="operand">V.total</e>
+          <e type="operand">2</e>
+          <e type="operand">V.carrinho</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">/</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">1173.6</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="486" width="90" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">α.tamanho</e>
+          <e type="operand">2</e>
+          <e type="operator" args="2">:</e>
+        </input>
+      </math>
+    </region>
+    <region left="0" top="513" width="284" height="39" color="#000000" fontSize="10">
+      <math decimalPlaces="3">
+        <input>
+          <e type="operand">C.tijolo_r</e>
+          <e type="operand">C.tijolo</e>
+          <e type="operand">α.tamanho</e>
+          <e type="operand">1</e>
+          <e type="operator" args="1">-</e>
+          <e type="operator" args="2">^</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">0.07</e>
+          <e type="operand" style="unit">m</e>
+          <e type="operator" args="2">*</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="540" width="292" height="39" color="#000000" fontSize="10">
+      <math decimalPlaces="3">
+        <input>
+          <e type="operand">L.tijolo_r</e>
+          <e type="operand">L.tijolo</e>
+          <e type="operand">α.tamanho</e>
+          <e type="operand">1</e>
+          <e type="operator" args="1">-</e>
+          <e type="operator" args="2">^</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">0.045</e>
+          <e type="operand" style="unit">m</e>
+          <e type="operator" args="2">*</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="567" width="292" height="39" color="#000000" fontSize="10">
+      <math decimalPlaces="3">
+        <input>
+          <e type="operand">A.tijolo_r</e>
+          <e type="operand">A.tijolo</e>
+          <e type="operand">α.tamanho</e>
+          <e type="operand">1</e>
+          <e type="operator" args="1">-</e>
+          <e type="operator" args="2">^</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">0.095</e>
+          <e type="operand" style="unit">m</e>
+          <e type="operator" args="2">*</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="603" width="231" height="53" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">Q.tijolo_r_c</e>
+          <e type="operand">C.carrinho</e>
+          <e type="operand">C.tijolo_r</e>
+          <e type="operator" args="2">/</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">7.5714</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="648" width="231" height="53" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">Q.tijolo_r_l</e>
+          <e type="operand">L.carrinho</e>
+          <e type="operand">L.tijolo_r</e>
+          <e type="operator" args="2">/</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">5.1111</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="693" width="231" height="53" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">Q.tijolo_r_a</e>
+          <e type="operand">A.carrinho</e>
+          <e type="operand">A.tijolo_r</e>
+          <e type="operator" args="2">/</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">2.6421</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="747" width="214" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">Q.tijolos_carrinho</e>
+          <e type="operand">3</e>
+          <e type="operand">5</e>
+          <e type="operator" args="2">*</e>
+          <e type="operand">4</e>
+          <e type="operator" args="2">*</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">60</e>
+        </result>
+      </math>
+    </region>
+    <region left="0" top="774" width="266" height="30" color="#000000" fontSize="10">
+      <math>
+        <input>
+          <e type="operand">Q.tijolos_forno</e>
+          <e type="operand">Q.tijolos_carrinho</e>
+          <e type="operator" args="2">:</e>
+        </input>
+        <result action="numeric">
+          <e type="operand">60</e>
+        </result>
+      </math>
+    </region>
+  </regions>
+</worksheet>
