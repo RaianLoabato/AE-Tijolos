@@ -1,0 +1,854 @@
+﻿<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<!-- Declaração estrita de viewport: Alavanca matricial para Responsividade Mobile-First -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IHM - Parametrização Térmica do Forno - SCADA View</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Barlow+Condensed:wght@500;600;700&display=swap');
+
+  :root {
+    --bg: #14181c;
+    --panel: #1c2228;
+    --panel-2: #232b32;
+    --line: #333e46;
+    --text: #e7ecef;
+    --dim: #7f8b93;
+    --amber: #e58a2a;
+    --amber-dim: #6b4a22;
+    --ok: #4caf7d;
+    --ok-dim: #234832;
+    --down: #4a9bd6;
+    --down-dim: #1f3a4d;
+    --flat: #7f8b93;
+    --danger: #d65c5c;
+  }
+  
+  * { box-sizing: border-box; }
+  
+  /* =========================================
+     FUNDAÇÕES ESTILÍSTICAS BASE (MOBILE-FIRST)
+     ========================================= */
+  body {
+    margin: 0; 
+    background: var(--bg); 
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* No ambiente móvel original, o equipamento ocupa os 100% de margem sem delimitações umbrais */
+  .device {
+    width: 100%;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; border-bottom: 1px solid var(--line);
+    background: var(--panel-2);
+  }
+  .brand {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: .14em; color: var(--dim); text-transform: uppercase;
+  }
+  .wifi {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ok);
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+  .dot.syncing { background: var(--amber); box-shadow: 0 0 6px var(--amber); animation: pulse 1s infinite alternate; }
+
+  @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
+
+  /* Segmentação Vertical Universal no formato de pequenos ecrãs */
+  .layout-grid {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .sidebar-controls {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .main-results {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+    background: var(--bg);
+  }
+
+  .header { padding: 20px 20px 8px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--amber);
+    letter-spacing: .12em; text-transform: uppercase; margin: 0 0 4px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  h1 { margin: 0; font-size: 26px; font-weight: 600; letter-spacing: .01em; }
+  .sub { margin: 4px 0 0; color: var(--dim); font-size: 14.5px; }
+
+  .form { padding: 8px 20px 4px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+  #segmentsScroll { overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 2px; flex: 1; min-height: 150px; }
+  #segmentsScroll::-webkit-scrollbar { width: 6px; }
+  #segmentsScroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+  #segmentsList { display: flex; flex-direction: column; gap: 14px; }
+  
+  #btnRowTop { position: sticky; top: 0; z-index: 2; background: var(--panel); padding-top: 2px; padding-bottom: 10px; margin-bottom: -4px; }
+
+  /* Interação Humana (Formulários) */
+  .field label {
+    display: block; font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    color: var(--dim); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .input-row {
+    display: flex; align-items: center; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; transition: border-color 0.2s;
+  }
+  .input-row:focus-within { border-color: var(--amber); }
+  .input-row input {
+    flex: 1; width: 100%; background: transparent; border: none; outline: none; color: var(--text);
+    font-family: 'JetBrains Mono', monospace; font-size: 19px; font-weight: 500;
+  }
+  .input-row input:disabled { color: var(--dim); }
+  .unit { color: var(--dim); font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap; margin-left: 6px; }
+
+  /* Cartões Dinâmicos representativos dos Pontos (Segmentos) */
+  .segment { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 13px; position: relative; }
+  .segment .seg-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .seg-title { font-size: 15.5px; font-weight: 600; }
+  .seg-remove {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--danger);
+    border: 1px solid #5a2c2c; border-radius: 4px; padding: 2px 7px; cursor: pointer; background: transparent; transition: background 0.2s;
+  }
+  .seg-remove:hover:not(:disabled) { background: #2a1616; }
+  .seg-remove:disabled { opacity: 0.5; cursor: not-allowed; }
+  .seg-result {
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line);
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+  }
+  .seg-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 8px; border-radius: 20px; font-weight: 700; font-size: 10.5px; letter-spacing: .04em;
+  }
+  .seg-badge.up { background: var(--ok-dim); color: var(--ok); }
+  .seg-badge.down { background: var(--down-dim); color: var(--down); }
+  .seg-badge.flat { background: #2a2f34; color: var(--flat); }
+  .seg-rate { color: var(--dim); }
+  .seg-rate b { color: var(--text); font-weight: 600; }
+  .p-flow { display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--dim); margin-bottom: 2px; }
+  .p-flow b { color: var(--amber); }
+
+  /* Elementos de Submissão e Regresso */
+  .btn-row { display: flex; gap: 10px; }
+  button { transition: all 0.2s ease; }
+  .add-segment {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    border: 1px dashed var(--line); border-radius: 10px; padding: 12px;
+    color: var(--dim); font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: .06em; cursor: pointer; background: transparent;
+  }
+  .add-segment:hover:not(:disabled) { border-color: var(--amber); color: var(--amber); }
+  
+  .finish-btn, .confirm-btn {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    border: 1px solid var(--amber-dim); border-radius: 10px; padding: 12px;
+    color: var(--amber); font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: .06em; cursor: pointer; background: rgba(229,138,42,.06); width: 100%;
+  }
+  .finish-btn:hover:not(:disabled), .confirm-btn:hover:not(:disabled) { background: rgba(229,138,42,.14); }
+  button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .restart-link {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--dim);
+    text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; display: flex; align-items: center; gap: 4px; align-self: flex-end;
+  }
+  .restart-link:hover { color: var(--danger); }
+
+  .started-header { display: flex; align-items: center; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--dim); }
+  .started-header b { color: var(--text); }
+
+  /* Secção de Quadros Representativos de Análise HMI */
+  .summary-banner {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--ok-dim); border: 1px solid #2e5f42; color: var(--ok);
+    border-radius: 10px; padding: 10px 12px; font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px; margin-bottom: 2px;
+  }
+  .edit-link { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--ok); text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; }
+
+  .chart-wrap { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; width: 100%; flex: 1; min-height: 300px; display: flex; flex-direction: column; }
+  .chart-title { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--dim); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+  
+  /* Sistema de Canvas Dinâmico para expansão da Grelha */
+  .canvas-container { position: relative; flex: 1; width: 100%; height: 100%; min-height: 250px; }
+  canvas { position: absolute; width: 100%; height: 100%; display: block; }
+
+  .table-wrap { overflow-x: auto; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; }
+  table.summary-table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  table.summary-table th {
+    text-align: left; color: var(--dim); font-weight: 500; padding: 10px 12px;
+    border-bottom: 1px solid var(--line); text-transform: uppercase; font-size: 9.5px; letter-spacing: .05em; background: var(--panel);
+  }
+  table.summary-table td { padding: 10px 12px; border-bottom: 1px solid #262d33; white-space: nowrap; }
+
+  .totals {
+    display: flex; justify-content: space-between; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--dim);
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+  }
+  .totals b { color: var(--text); }
+
+  .footer { padding: 14px 20px 22px; margin-top: auto; border-top: 1px solid var(--line); }
+  .btn-primary {
+    width: 100%; padding: 14px; border-radius: 9px; border: none;
+    background: var(--amber); color: #1a1204; font-weight: 700; font-size: 17px;
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: .02em; cursor: pointer;
+    box-shadow: 0 8px 20px rgba(229,138,42,.25);
+  }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+  .hint { margin-top: 10px; text-align: center; font-size: 12.5px; color: var(--dim); min-height: 18px; }
+  .frame-label { display: none; }
+
+
+  /* =========================================
+     TRANSFORMAÇÃO ADAPTATIVA PARA COMPUTADORES (CSS GRID LAYOUT)
+     ========================================= */
+  @media (min-width: 1024px) {
+    body { padding: 24px; align-items: center; justify-content: center; background: var(--bg); }
+    
+    .device {
+      /* Reassunção de estéticas e sombras características aos painéis HMI em monitor amplo */
+      max-width: 1400px;
+      height: 90vh; 
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 30px 60px rgba(0,0,0,.5);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Divisão estrutural principal SCADA: Parâmetros fixos e Informação extensiva expansiva */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .sidebar-controls {
+      border-right: 1px solid var(--line);
+      background: var(--panel);
+      overflow-y: hidden; 
+    }
+
+    .main-results {
+      overflow-y: auto;
+      padding: 30px;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .device { max-width: 1600px; }
+    .layout-grid { grid-template-columns: 460px 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="device">
+    <!-- BARRA SUPERIOR DE INDICAÇÕES GLOBAIS (SCADA HEADER) -->
+    <header class="topbar">
+      <span class="brand">Forno · Olaria Modesto</span>
+      <span class="wifi" id="connectionStatus"><span class="dot" id="dbDot"></span>ESTADO DB: CONECTADO</span>
+    </header>
+
+    <div class="layout-grid">
+      <!-- PAINEL FIXO (OU EM COLUNA) DE PARAMETRIZAÇÃO DIRETA -->
+      <aside class="sidebar-controls">
+        <div class="header">
+          <p class="eyebrow"><span>Parâmetros de Receita</span><span id="stepCount">Ponto de Base Zero</span></p>
+          <h1>Definição de Curva Térmica</h1>
+          <p class="sub" id="subText">Proceda com a definição térmica primária (P0) para instanciar a rotina no motor de base de dados.</p>
+        </div>
+
+        <div class="form" id="formArea">
+          <!-- Bloco Operacional 1: Registo Pai Primordial (P0) -->
+          <div id="p0Field">
+            <div class="field">
+              <label>Temperatura inicial de arranque (P0)</label>
+              <div class="input-row">
+                <input type="text" id="p0Temp" placeholder="ex: 0" inputmode="decimal" />
+                <span class="unit">°C</span>
+              </div>
+            </div>
+            <button class="confirm-btn" id="confirmP0Btn">FORJAR REGISTRO (P0) EM SISTEMA SQL →</button>
+          </div>
+
+          <!-- Bloco Operacional 2: Sub-registos Lógicos Transacionais -->
+          <div id="nextField" style="display:none;">
+            <div class="started-header">
+              <span>Sequência de Ensaio Ativa: P0 = <b id="p0Display">0°C</b></span>
+              <button class="restart-link" id="restartBtn" title="Aniquilar árvore da instância ativa através de ROLLBACK ou DELETE Lógico">↺ purgar db relacional</button>
+            </div>
+
+            <div class="field" style="margin-top:10px;">
+              <label id="nextLabel">Temperaturas Alvo Transitórias</label>
+              <div class="input-row">
+                <input type="text" id="nextTempInput" inputmode="decimal" placeholder="ex: 40" />
+                <span class="unit">°C</span>
+              </div>
+            </div>
+
+            <div class="btn-row" id="btnRowTop">
+              <button class="add-segment" id="addBtn">+ FORNECER PONTO REST API</button>
+              <button class="finish-btn" id="finishBtn">ENCERRAR VETOR TÉRMICO</button>
+            </div>
+
+            <div id="segmentsScroll"><div id="segmentsList"></div></div>
+          </div>
+
+          <div id="summaryBanner" style="display:none;">
+            <div class="summary-banner">
+              <span>✓ Blocos numéricos comitados ao SQL — <span id="finalCount">0</span> indexações</span>
+              <button class="edit-link" id="editBtn">modificações retroativas</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <p class="hint" id="hintText">Defina os pressupostos P0 para enquadrar a sessão relacional</p>
+          <button class="btn-primary" id="mainBtn" disabled>Conjunto Analítico Inconclusivo</button>
+        </div>
+      </aside>
+
+      <!-- PAINEL DINÂMICO DE ANÁLISE DE RESULTADOS E COMPILAÇÕES (ÁREA EXPANSÍVEL) -->
+      <main class="main-results" id="resultsArea" style="display:none;">
+        <div class="chart-wrap">
+          <div class="chart-title">Representação Escalar da Interpolação Matemática das Rampas (Renderer HMI Otimizado)</div>
+          <div class="canvas-container">
+            <canvas id="chart"></canvas>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="summary-table" id="summaryTable">
+            <thead>
+              <tr><th>Chave ID (Filho)</th><th>Transição Linear</th><th>Delta Térmico (ΔT)</th><th>Escala Cronológica</th><th>Poder de Aque.</th><th>Tendência Física</th></tr>
+            </thead>
+            <tbody id="summaryTbody"></tbody>
+          </table>
+        </div>
+
+        <div class="totals">
+          <span>Perspetiva Global Transitória: <b id="totalTime">0 min</b></span>
+          <span>Quantidade de Ficheiros Consolidados: <b id="totalSteps">0</b></span>
+        </div>
+      </main>
+    </div>
+  </div>
+
+<script>
+  /**
+   * ARQUITETURA ADAPTADORA (MOCK API - COMUNICAÇÃO DE INTERFACE DE REDE ASSÍNCRONA)
+   * A separação imperativa entre apresentação e persistência exige que todos os eventos do utilizador acionem chamadas indiretas.
+   * Quando o backend em Node.js/Express estiver efetivo, substitui-se o conteúdo pelas chamadas reais de "fetch()".
+   */
+  const DatabaseAdapter = {
+    // Engate artifical balístico para refletir a oscilação de milisegundos das queries nas Tabelas
+    delay: (ms) => new Promise(res => setTimeout(res, ms)),
+    
+    // Controlador visual indiciador do status vital da conexão RESTful e SGBD
+    setNetworkState(isActive) {
+      const dot = document.getElementById('dbDot');
+      const text = document.getElementById('connectionStatus');
+      if(isActive) {
+        dot.classList.add('syncing');
+        text.innerHTML = '<span class="dot syncing" id="dbDot"></span>OPERAÇÃO REDE EM CURSO...';
+        text.style.color = 'var(--amber)';
+      } else {
+        dot.classList.remove('syncing');
+        text.innerHTML = '<span class="dot" id="dbDot"></span>ESTADO DB: CONECTADO';
+        text.style.color = 'var(--ok)';
+      }
+    },
+
+    // SIMULAÇÃO INATIVA: POST /api/assays
+    async createAssay(p0Temp) {
+      this.setNetworkState(true);
+      await this.delay(650); // Atraso fictício espelhando TCP handshake do Pool de conexões SQL
+      console.log(`[HTTP POST Transmitido - Tabela Pai] Ensaio criado c/ P0=${p0Temp}`);
+      this.setNetworkState(false);
+      return { id: Math.floor(Math.random() * 100000), p0: p0Temp };
+    },
+
+    // SIMULAÇÃO INATIVA: POST /api/assays/{id}/segments
+    async createSegment(assayId, tempTarget, stepOrder) {
+      this.setNetworkState(true);
+      await this.delay(420);
+      console.log(`[HTTP POST Transmitido - Tabela Filha] Target Alvo ${tempTarget} armazenado via Foreing Key relacional`);
+      this.setNetworkState(false);
+      return { dbId: Math.floor(Math.random() * 100000) };
+    },
+
+    // SIMULAÇÃO INATIVA: PUT /api/segments/{id} (Acréscimos dinâmicos num vetor já criado)
+    async updateSegmentDuration(segmentDbId, duration) {
+      console.log(`[HTTP PUT Transmitido - Modificação na Tabela Filha] Coluna duração parametrizada para ${duration}`);
+    },
+
+    // SIMULAÇÃO INATIVA: DELETE /api/segments/{id}
+    async deleteSegment(segmentDbId) {
+      this.setNetworkState(true);
+      await this.delay(550);
+      console.log(`[HTTP DELETE Transmitido - Remoção Cirúrgica] Despacho isolado aprovado na Tabela`);
+      this.setNetworkState(false);
+      return true;
+    },
+
+    // SIMULAÇÃO INATIVA: DELETE TOTAL CASCADE via Transação Acid (Remoção P0)
+    async purgeAssay(assayId) {
+      this.setNetworkState(true);
+      await this.delay(870);
+      console.log(`[HTTP DELETE Transversal - Expurgos de P0] Ensaio eliminado juntamente com a estrutura dependente via constrangimento SQL`);
+      this.setNetworkState(false);
+      return true;
+    }
+  };
+
+  // ---- Modelos Comportamentais da Máquina de Estados (Client-side) ----
+  let appState = {
+    currentAssayId: null,
+    p0Value: 0,
+    segments: [], // Armazena a tupla dos dados transacionais locais
+    nextId: 1,
+    finalized: false,
+    started: false
+  };
+
+  // Estrutura Estática Document Object Model (DOM) de indexação veloz
+  const UI = {
+    segmentsList: document.getElementById('segmentsList'),
+    addBtn: document.getElementById('addBtn'),
+    finishBtn: document.getElementById('finishBtn'),
+    editBtn: document.getElementById('editBtn'),
+    confirmP0Btn: document.getElementById('confirmP0Btn'),
+    p0Input: document.getElementById('p0Temp'),
+    p0Field: document.getElementById('p0Field'),
+    nextField: document.getElementById('nextField'),
+    p0Display: document.getElementById('p0Display'),
+    nextLabel: document.getElementById('nextLabel'),
+    nextTempInput: document.getElementById('nextTempInput'),
+    restartBtn: document.getElementById('restartBtn'),
+    mainBtn: document.getElementById('mainBtn'),
+    hintText: document.getElementById('hintText'),
+    subText: document.getElementById('subText'),
+    stepCount: document.getElementById('stepCount'),
+    summaryBanner: document.getElementById('summaryBanner'),
+    resultsArea: document.getElementById('resultsArea'),
+    summaryTbody: document.getElementById('summaryTbody'),
+    totalTime: document.getElementById('totalTime'),
+    totalSteps: document.getElementById('totalSteps'),
+    finalCount: document.getElementById('finalCount')
+  };
+
+  /**
+   * Conectores Funcionais Atrelados aos Atrasos e Confirmações do Pseudo-Backend
+   */
+  async function confirmP0() {
+    const v = parseFloat(UI.p0Input.value);
+    const validatedP0 = (UI.p0Input.value.trim() === '' || isNaN(v)) ? 0 : v;
+    
+    UI.confirmP0Btn.disabled = true;
+    UI.confirmP0Btn.textContent = 'ESTABELECENDO TRANSAÇÃO INICIAL...';
+
+    try {
+      const response = await DatabaseAdapter.createAssay(validatedP0);
+      appState.currentAssayId = response.id;
+      appState.p0Value = response.p0;
+      appState.started = true;
+
+      UI.p0Field.style.display = 'none';
+      UI.nextField.style.display = 'block';
+      UI.p0Display.textContent = appState.p0Value + '°C';
+      UI.subText.textContent = 'Providencie ao sistema sequências térmicas acopladas para forjar a diretriz da caldeira.';
+      UI.stepCount.textContent = 'Chave Pai DB: 0x' + appState.currentAssayId.toString(16).toUpperCase();
+      
+      renderSegments();
+      UI.nextTempInput.focus();
+    } catch(e) {
+      alert("Alerta de Severidade: Incapacidade do sistema em persistir dados essenciais para SQL.");
+    } finally {
+      UI.confirmP0Btn.disabled = false;
+      UI.confirmP0Btn.textContent = 'FORJAR REGISTRO (P0) EM SISTEMA SQL →';
+    }
+  }
+
+  async function addSegment() {
+    if(appState.finalized) return;
+    const v = parseFloat(UI.nextTempInput.value);
+    
+    if(UI.nextTempInput.value.trim() === '' || isNaN(v)){
+      UI.hintText.textContent = '⚠ Rejeição Paramétrica: Inconsistência de matriz - forneça algarismos concretos';
+      UI.hintText.style.color = 'var(--danger)';
+      setTimeout(()=>{ UI.hintText.style.color = 'var(--dim)'; updateHint(); }, 3000);
+      UI.nextTempInput.focus();
+      return;
+    }
+
+    UI.addBtn.disabled = true;
+    try {
+      const res = await DatabaseAdapter.createSegment(appState.currentAssayId, v, appState.segments.length + 1);
+      
+      appState.segments.push({ 
+        id: appState.nextId++, 
+        dbId: res.dbId, 
+        temp: v, 
+        duration: null 
+      });
+      
+      UI.nextTempInput.value = '';
+      renderSegments();
+    } catch(e) {
+      alert("Obstrução na comunicação descendente filho/segmento.");
+    } finally {
+      UI.addBtn.disabled = false;
+      UI.nextTempInput.focus();
+    }
+  }
+
+  async function removeSegment(localId) {
+    if(appState.finalized) return;
+    const seg = appState.segments.find(s => s.id === localId);
+    if(seg && seg.dbId) {
+      const buttons = document.querySelectorAll('.seg-remove');
+      buttons.forEach(b => b.disabled = true);
+      
+      await DatabaseAdapter.deleteSegment(seg.dbId);
+      appState.segments = appState.segments.filter(s => s.id !== localId);
+      renderSegments();
+    }
+  }
+
+  async function resetDatabaseState() {
+    if(!appState.currentAssayId) return;
+    UI.restartBtn.disabled = true;
+    await DatabaseAdapter.purgeAssay(appState.currentAssayId);
+    
+    appState = {
+      currentAssayId: null, p0Value: 0, segments: [], nextId: 1, finalized: false, started: false
+    };
+    
+    UI.p0Input.value = '';
+    UI.nextTempInput.value = '';
+    UI.p0Field.style.display = 'block';
+    UI.nextField.style.display = 'none';
+    UI.summaryBanner.style.display = 'none';
+    UI.resultsArea.style.display = 'none';
+    UI.addBtn.style.display = 'flex';
+    UI.finishBtn.style.display = 'flex';
+    
+    UI.subText.textContent = 'Proceda com a definição térmica primária (P0) para instanciar a rotina no motor de base de dados.';
+    UI.stepCount.textContent = 'Ponto de Base Zero';
+    UI.mainBtn.disabled = true;
+    UI.mainBtn.textContent = 'Conjunto Analítico Inconclusivo';
+    UI.hintText.textContent = 'Defina os pressupostos P0 para enquadrar a sessão relacional';
+    UI.hintText.style.color = 'var(--dim)';
+    
+    UI.restartBtn.disabled = false;
+    UI.p0Input.focus();
+  }
+
+  // ---- Mecânica Analítica e Representacional Gráfica da IHM ----
+  function classify(delta) {
+    if(Math.abs(delta) < 1e-9) return {cls:'flat', label:'PLANO DE ESTABILIZAÇÃO', arrow:'→'};
+    if(delta > 0) return {cls:'up', label:'TAXA AQUISITIVA POSITIVA', arrow:'↑'};
+    return {cls:'down', label:'PROCESSO ARREFECEDOR', arrow:'↓'};
+  }
+
+  function renderSegments() {
+    UI.segmentsList.innerHTML = '';
+    let prevTemp = appState.p0Value;
+
+    appState.segments.forEach((seg, idx) => {
+      const pFrom = idx; 
+      const pTo = idx + 1; 
+      const wrap = document.createElement('div');
+      wrap.className = 'segment';
+
+      const delta = seg.temp - prevTemp;
+      const dt = (seg.duration !== null && !isNaN(seg.duration)) ? seg.duration : null;
+      let resultHtml = '';
+      
+      const info = classify(delta);
+      if(dt) {
+        const rate = delta / dt;
+        resultHtml = `
+          <div class="seg-result">
+            <span class="seg-badge ${info.cls}">${info.arrow} ${info.label}</span>
+            <span class="seg-rate">Fator ΔT: <b>${delta.toFixed(1)}°C</b> · Rendimento <b>${Math.abs(rate).toFixed(2)}</b> °C/m</span>
+          </div>`;
+      } else {
+        resultHtml = `
+          <div class="seg-result">
+            <span class="seg-badge ${info.cls}">${info.arrow} ${info.label}</span>
+            <span class="seg-rate">Fator ΔT: <b>${delta.toFixed(1)}°C</b> · Omissão crítica de tempo</span>
+          </div>`;
+      }
+
+      wrap.innerHTML = `
+        <div class="seg-label">
+          <div>
+            <div class="seg-title">Bloco Físico PID ${String(pTo).padStart(2,'0')} · Interseção P${pFrom} → P${pTo}</div>
+            <div class="p-flow">Escalonando de <b>${prevTemp}°C</b> para pico de <b>${seg.temp}°C</b></div>
+          </div>
+          <button class="seg-remove" data-remove="${seg.id}">APAGAR</button>
+        </div>
+        <div class="field">
+          <label>Projeção de Duração Operativa Acumulada</label>
+          <div class="input-row">
+            <input type="text" inputmode="decimal" data-dur="${seg.id}" value="${seg.duration !== null ? seg.duration : ''}" placeholder="p. ex. inserção: 90" />
+            <span class="unit">min</span>
+          </div>
+        </div>
+        ${resultHtml}
+      `;
+      UI.segmentsList.appendChild(wrap);
+      prevTemp = seg.temp;
+    });
+
+    UI.segmentsList.querySelectorAll('[data-dur]').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const id = parseInt(e.target.getAttribute('data-dur'));
+        const seg = appState.segments.find(s => s.id === id);
+        const v = parseFloat(e.target.value);
+        seg.duration = e.target.value === '' ? null : (isNaN(v) ? null : v);
+        
+        if(seg.duration !== null) DatabaseAdapter.updateSegmentDuration(seg.dbId, seg.duration);
+        
+        renderSegments();
+        restoreFocus(id);
+      });
+    });
+
+    UI.segmentsList.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        removeSegment(parseInt(e.target.getAttribute('data-remove')));
+      });
+    });
+
+    UI.nextLabel.textContent = appState.segments.length ? `Alvo subsequente consecutivo (pós nódulo P${appState.segments.length})` : 'Injeção de temperatura sequente';
+    UI.stepCount.textContent = appState.segments.length ? `DB 0x${appState.currentAssayId.toString(16).toUpperCase()} | Nós atrelados: ${appState.segments.length}` : `DB 0x${appState.currentAssayId.toString(16).toUpperCase()}`;
+    UI.finishBtn.disabled = appState.segments.length === 0;
+    updateHint();
+  }
+
+  function restoreFocus(id) {
+    const el = UI.segmentsList.querySelector(`[data-dur="${id}"]`);
+    if(el){ el.focus(); const val = el.value; el.setSelectionRange(val.length, val.length); }
+  }
+
+  function updateHint() {
+    if(appState.finalized) return;
+    if(!appState.started) {
+      UI.hintText.textContent = 'Defina os pressupostos P0 para enquadrar a sessão relacional';
+    } else if(appState.segments.length === 0) {
+      UI.hintText.textContent = 'Prossiga alimentando o vetor de calibração numérica sequencialmente';
+    } else {
+      const incomplete = appState.segments.some(s => s.duration === null);
+      UI.hintText.textContent = incomplete
+        ? '⚠️ Informação lacunar presente: Sanear matrizes de duração nulas em segmentos'
+        : 'Sintaxe matemática validada. Execute o Commit para verificação escalar e transacional.';
+    }
+  }
+
+  // --- Funções Resumo e Expressão Escalar (Responsive HTML Canvas) ---
+  UI.finishBtn.addEventListener('click', () => {
+    const valid = appState.segments.length > 0 && appState.segments.every(s => s.duration !== null && s.duration > 0);
+    if(!valid) {
+      UI.hintText.textContent = '⚠ Operação abortada pela camada de controlo: Vetores nulos localizados';
+      UI.hintText.style.color = 'var(--danger)';
+      setTimeout(()=>{ UI.hintText.style.color = 'var(--dim)'; updateHint(); }, 2200);
+      return;
+    }
+    appState.finalized = true;
+    UI.addBtn.style.display = 'none';
+    UI.finishBtn.style.display = 'none';
+    document.getElementById('nextField').querySelector('.field').style.display = 'none';
+    UI.segmentsList.querySelectorAll('input').forEach(i => i.setAttribute('disabled', true));
+    UI.segmentsList.querySelectorAll('.seg-remove').forEach(b => b.style.display = 'none');
+    UI.summaryBanner.style.display = 'block';
+    UI.finalCount.textContent = appState.segments.length;
+    
+    // Desvenda o invólucro à direita do painel. Em modo SCADA Desktop, o CSS Grid enche a sua metade automaticamente.
+    UI.resultsArea.style.display = 'flex';
+    
+    UI.mainBtn.disabled = false;
+    UI.mainBtn.textContent = 'Exportar Protocolo a Central Controlador Lógico Programável (CLP) →';
+    UI.hintText.textContent = 'Sintaxe aceite e confirmada pela matriz HMI. Verificação concluída.';
+    
+    buildSummaryTable();
+    
+    setTimeout(() => { drawResponsiveChart(); }, 75);
+  });
+
+  UI.editBtn.addEventListener('click', () => {
+    appState.finalized = false;
+    UI.nextField.querySelector('.field').style.display = 'block';
+    UI.addBtn.style.display = 'flex';
+    UI.finishBtn.style.display = 'flex';
+    UI.summaryBanner.style.display = 'none';
+    UI.resultsArea.style.display = 'none'; 
+    UI.mainBtn.disabled = true;
+    UI.mainBtn.textContent = 'Conjunto Analítico Inconclusivo';
+    renderSegments();
+  });
+
+  function buildSummaryTable() {
+    UI.summaryTbody.innerHTML = '';
+    let prevTemp = appState.p0Value;
+    let totTime = 0;
+    appState.segments.forEach((seg, idx) => {
+      const pFrom = idx, pTo = idx + 1;
+      const delta = seg.temp - prevTemp;
+      const rate = delta / seg.duration;
+      const info = classify(delta);
+      totTime += seg.duration;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span style="font-family:'JetBrains Mono'; font-size:10px; opacity:0.7;">Chave-BD</span><br>#${seg.dbId}</td>
+        <td>P${pFrom} → P${pTo}</td>
+        <td style="color:${delta > 0 ? 'var(--amber)' : (delta < 0 ? 'var(--down)' : 'var(--text)')}">${delta > 0 ? '+' : ''}${delta.toFixed(1)}°C</td>
+        <td>${seg.duration} m</td>
+        <td>${Math.abs(rate).toFixed(2)} °C/m</td>
+        <td><span class="seg-badge ${info.cls}">${info.arrow}</span></td>
+      `;
+      UI.summaryTbody.appendChild(tr);
+      prevTemp = seg.temp;
+    });
+    UI.totalTime.textContent = totTime + ' minutos (Acumulativo)';
+    UI.totalSteps.textContent = appState.segments.length;
+  }
+
+  function drawResponsiveChart() {
+    const canvas = document.getElementById('chart');
+    const ctx = canvas.getContext('2d');
+    const container = canvas.parentElement;
+    
+    // Auto-dimensão dinâmica obediente aos ditames CSS responsivos do Layout Base
+    const W = canvas.width = container.clientWidth;
+    const H = canvas.height = container.clientHeight;
+    ctx.clearRect(0, 0, W, H);
+
+    const padL = 46, padR = 20, padT = 20, padB = 34;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+
+    let points = [{ t: 0, temp: appState.p0Value }];
+    let cumT = 0;
+    appState.segments.forEach(seg => {
+      cumT += seg.duration;
+      points.push({ t: cumT, temp: seg.temp });
+    });
+
+    const maxT = points[points.length - 1].t || 1;
+    const temps = points.map(p => p.temp);
+    let minTemp = Math.min(0, ...temps);
+    let maxTemp = Math.max(...temps);
+    if(maxTemp === minTemp){ maxTemp += 1; minTemp -= 1; }
+    const rangePad = (maxTemp - minTemp) * 0.1;
+    minTemp -= rangePad; maxTemp += rangePad;
+
+    function X(t){ return padL + (t / maxT) * plotW; }
+    function Y(temp){ return padT + plotH - ((temp - minTemp) / (maxTemp - minTemp)) * plotH; }
+
+    // Representação Falsa Grelha Escalar de Profundidade SCADA
+    ctx.strokeStyle = '#2b333a';
+    ctx.lineWidth = 1;
+    ctx.font = '11px JetBrains Mono, monospace';
+    ctx.fillStyle = '#7f8b93';
+    const gridLines = 5;
+    for(let i=0; i<=gridLines; i++){
+      const temp = minTemp + (maxTemp - minTemp) * (i / gridLines);
+      const y = Y(temp);
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(W - padR, y);
+      ctx.stroke();
+      ctx.fillText(Math.round(temp) + '°', 4, y + 4);
+    }
+
+    // Marcações Horárias
+    points.forEach((p, i) => {
+      const x = X(p.t);
+      ctx.fillStyle = '#7f8b93';
+      ctx.fillText(p.t + 'm', Math.max(padL, Math.min(x - 8, W - padR - 22)), H - 10);
+    });
+
+    // Balizas Limitadoras do Espaço Bidimensional
+    ctx.strokeStyle = '#3a444c';
+    ctx.beginPath();
+    ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + plotH); ctx.lineTo(W - padR, padT + plotH);
+    ctx.stroke();
+
+    // Riscador Geométrico Linear (Vetor de Corrente)
+    ctx.strokeStyle = '#e58a2a';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      const x = X(p.t), y = Y(p.temp);
+      if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Sombra Projetiva Termodinâmica Artificial de Base
+    ctx.lineTo(X(points[points.length-1].t), Y(minTemp));
+    ctx.lineTo(X(points[0].t), Y(minTemp));
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(229,138,42,0.08)';
+    ctx.fill();
+
+    // Nódulos Térmicos Reais
+    points.forEach((p, i) => {
+      const x = X(p.t), y = Y(p.temp);
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI*2);
+      ctx.fillStyle = '#14181c';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#e58a2a';
+      ctx.stroke();
+      ctx.fillStyle = '#e7ecef';
+      ctx.font = 'bold 11px JetBrains Mono, monospace';
+      ctx.fillText('P' + i, x - 8, y - 10);
+    });
+  }
+
+  // --- Acionadores Globais Acoplados a Interações Periféricas ---
+  UI.confirmP0Btn.addEventListener('click', confirmP0);
+  UI.p0Input.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); confirmP0(); } });
+  UI.addBtn.addEventListener('click', addSegment);
+  UI.nextTempInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); addSegment(); } });
+  UI.restartBtn.addEventListener('click', resetDatabaseState);
+  
+  // Garantia absoluta de adequação do Canvas em tempo real (Fluidez de Design em Resize)
+  window.addEventListener('resize', () => {
+    if(appState.finalized) {
+      drawResponsiveChart();
+    }
+  });
+
+  updateHint();
+  UI.p0Input.focus();
+</script>
+</body>
+</html>
