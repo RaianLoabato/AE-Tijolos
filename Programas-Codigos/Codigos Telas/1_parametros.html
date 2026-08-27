@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IHM - Parâmetros</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Barlow+Condensed:wght@500;600;700&display=swap');
+
+  :root{
+    --bg: #14181c;
+    --panel: #1c2228;
+    --panel-2: #232b32;
+    --line: #333e46;
+    --text: #e7ecef;
+    --dim: #7f8b93;
+    --amber: #e58a2a;
+    --amber-dim: #6b4a22;
+    --ok: #4caf7d;
+    --ok-dim: #234832;
+    --down: #4a9bd6;
+    --down-dim: #1f3a4d;
+    --flat: #7f8b93;
+    --danger: #d65c5c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Barlow Condensed', sans-serif;
+    display:flex; align-items:flex-start; justify-content:center;
+    min-height:100vh; padding:24px;
+  }
+  .device{
+    width:420px; max-width:100%; background:var(--panel);
+    border:1px solid var(--line); border-radius:14px;
+    box-shadow:0 30px 60px rgba(0,0,0,.5);
+    overflow:hidden;
+  }
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 18px; border-bottom:1px solid var(--line);
+    background:var(--panel-2);
+  }
+  .brand{
+    font-family:'JetBrains Mono', monospace; font-size:11px;
+    letter-spacing:.14em; color:var(--dim); text-transform:uppercase;
+  }
+  .wifi{
+    display:flex; align-items:center; gap:6px;
+    font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--ok);
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--ok); box-shadow:0 0 6px var(--ok);}
+
+  .header{ padding:20px 20px 8px; }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--amber);
+    letter-spacing:.12em; text-transform:uppercase; margin:0 0 4px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  h1{ margin:0; font-size:26px; font-weight:600; letter-spacing:.01em; }
+  .sub{ margin:4px 0 0; color:var(--dim); font-size:14.5px; }
+
+  .form{ padding:8px 20px 4px; display:flex; flex-direction:column; gap:14px; }
+  #segmentsScroll{ max-height:34vh; overflow-y:auto; display:flex; flex-direction:column; gap:14px; padding-right:2px; }
+  #segmentsScroll::-webkit-scrollbar{width:6px;}
+  #segmentsScroll::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px;}
+  #segmentsList{ display:flex; flex-direction:column; gap:14px; }
+  #btnRowTop{ position:sticky; top:0; z-index:2; background:var(--panel); padding-top:2px; padding-bottom:10px; margin-bottom:-4px; }
+  #segmentsScroll{ box-shadow: inset 0 8px 6px -6px rgba(0,0,0,.35); }
+
+  .field label{
+    display:block; font-family:'JetBrains Mono', monospace; font-size:10.5px;
+    color:var(--dim); letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px;
+  }
+  .input-row{
+    display:flex; align-items:center; background:var(--panel-2);
+    border:1px solid var(--line); border-radius:8px; padding:10px 12px;
+  }
+  .input-row:focus-within{ border-color:var(--amber); }
+  .input-row input{
+    flex:1; width:100%; background:transparent; border:none; outline:none; color:var(--text);
+    font-family:'JetBrains Mono', monospace; font-size:19px; font-weight:500;
+  }
+  .input-row.locked{ opacity:.5; pointer-events:none; }
+  .unit{ color:var(--dim); font-family:'JetBrains Mono', monospace; font-size:13px; white-space:nowrap; margin-left:6px;}
+
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .segment{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
+    padding:13px; position:relative;
+  }
+  .segment .seg-label{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;
+  }
+  .seg-title{ font-size:15.5px; font-weight:600; }
+  .seg-remove{
+    font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--danger);
+    border:1px solid #5a2c2c; border-radius:4px; padding:2px 7px; cursor:pointer;
+    background:transparent;
+  }
+  .seg-remove:hover{ background:#2a1616; }
+
+  .seg-result{
+    margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+    display:flex; align-items:center; justify-content:space-between;
+    font-family:'JetBrains Mono', monospace; font-size:11.5px;
+  }
+  .seg-badge{
+    display:inline-flex; align-items:center; gap:5px;
+    padding:3px 8px; border-radius:20px; font-weight:700; font-size:10.5px;
+    letter-spacing:.04em;
+  }
+  .seg-badge.up{ background:var(--ok-dim); color:var(--ok); }
+  .seg-badge.down{ background:var(--down-dim); color:var(--down); }
+  .seg-badge.flat{ background:#2a2f34; color:var(--flat); }
+  .seg-rate{ color:var(--dim); }
+  .seg-rate b{ color:var(--text); font-weight:600; }
+
+  .p-flow{
+    display:flex; align-items:center; gap:6px; font-family:'JetBrains Mono', monospace;
+    font-size:11px; color:var(--dim); margin-bottom:2px;
+  }
+  .p-flow b{ color:var(--amber); }
+
+  .btn-row{ display:flex; gap:10px; }
+  .add-segment{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+    border:1px dashed var(--line); border-radius:10px; padding:12px;
+    color:var(--dim); font-family:'JetBrains Mono', monospace; font-size:12px;
+    letter-spacing:.06em; cursor:pointer; background:transparent;
+  }
+  .add-segment:hover{ border-color:var(--amber); color:var(--amber); }
+
+  .finish-btn{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+    border:1px solid var(--amber-dim); border-radius:10px; padding:12px;
+    color:var(--amber); font-family:'JetBrains Mono', monospace; font-size:12px;
+    letter-spacing:.06em; cursor:pointer; background:rgba(229,138,42,.06);
+  }
+  .finish-btn:hover{ background:rgba(229,138,42,.14); }
+  .finish-btn:disabled{ opacity:.35; cursor:not-allowed; }
+
+  .confirm-btn{
+    width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+    border:1px solid var(--amber-dim); border-radius:10px; padding:12px;
+    color:var(--amber); font-family:'JetBrains Mono', monospace; font-size:12px;
+    letter-spacing:.06em; cursor:pointer; background:rgba(229,138,42,.06);
+  }
+  .confirm-btn:hover{ background:rgba(229,138,42,.14); }
+
+  .restart-link{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--dim);
+    text-decoration:underline; cursor:pointer; background:none; border:none; padding:0;
+    display:flex; align-items:center; gap:4px; align-self:flex-end;
+  }
+  .restart-link:hover{ color:var(--danger); }
+
+  .started-header{
+    display:flex; align-items:center; justify-content:space-between;
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--dim);
+  }
+  .started-header b{ color:var(--text); }
+
+  .summary-banner{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--ok-dim); border:1px solid #2e5f42; color:var(--ok);
+    border-radius:10px; padding:10px 12px; font-family:'JetBrains Mono', monospace;
+    font-size:11.5px; margin-bottom:2px;
+  }
+  .edit-link{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--ok);
+    text-decoration:underline; cursor:pointer; background:none; border:none; padding:0;
+  }
+
+  .chart-wrap{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
+    padding:12px;
+  }
+  .chart-title{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--dim);
+    letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px;
+  }
+  canvas{ width:100%; height:auto; display:block; }
+
+  .table-wrap{ overflow-x:auto; }
+  table.summary-table{
+    width:100%; border-collapse:collapse; font-family:'JetBrains Mono', monospace; font-size:11px;
+  }
+  table.summary-table th{
+    text-align:left; color:var(--dim); font-weight:500; padding:6px 6px;
+    border-bottom:1px solid var(--line); text-transform:uppercase; font-size:9.5px; letter-spacing:.05em;
+  }
+  table.summary-table td{ padding:7px 6px; border-bottom:1px solid #262d33; white-space:nowrap; }
+
+  .totals{
+    display:flex; justify-content:space-between; gap:10px;
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--dim);
+    background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px;
+  }
+  .totals b{ color:var(--text); }
+
+  .footer{ padding:14px 20px 22px; }
+  .btn{
+    width:100%; padding:14px; border-radius:9px; border:none;
+    background:var(--amber); color:#1a1204; font-weight:700; font-size:17px;
+    font-family:'Barlow Condensed', sans-serif; letter-spacing:.02em; cursor:pointer;
+    box-shadow:0 8px 20px rgba(229,138,42,.25);
+  }
+  .btn:disabled{ opacity:.35; cursor:not-allowed; box-shadow:none; }
+  .hint{
+    margin-top:10px; text-align:center; font-size:12.5px; color:var(--dim);
+  }
+
+  .frame-label{
+    text-align:center; margin-top:14px; font-family:'JetBrains Mono', monospace;
+    font-size:11px; color:var(--dim); letter-spacing:.1em; text-transform:uppercase;
+  }
+
+  /* Mobile */
+  @media (max-width:480px){
+    body{ padding:0; align-items:stretch; }
+    .device{ width:100%; border-radius:0; border:none; min-height:100vh; box-shadow:none; }
+    .form{ max-height:none; }
+    h1{ font-size:23px; }
+  }
+</style>
+</head>
+<body>
+<div style="width:420px; max-width:100%;">
+  <div class="device">
+    <div class="topbar">
+      <span class="brand">Forno · Olaria Modesto</span>
+      <span class="wifi"><span class="dot"></span>WI-FI</span>
+    </div>
+
+    <div class="header">
+      <p class="eyebrow"><span>Tela 1 de 4</span><span id="stepCount">Ponto de partida</span></p>
+      <h1>Parâmetros do ensaio</h1>
+      <p class="sub" id="subText">Digite a temperatura inicial do forno para começar.</p>
+    </div>
+
+    <div class="form" id="formArea">
+
+      <!-- Etapa 1: só aparece antes de existir um ponto inicial -->
+      <div id="p0Field">
+        <div class="field">
+          <label>Temperatura inicial (P0)</label>
+          <div class="input-row">
+            <input type="text" id="p0Temp" placeholder="ex: 0" inputmode="decimal" />
+            <span class="unit">°C</span>
+          </div>
+        </div>
+        <button class="confirm-btn" id="confirmP0Btn">DEFINIR PONTO INICIAL →</button>
+      </div>
+
+      <!-- Etapa 2: só aparece depois que P0 foi definido -->
+      <div id="nextField" style="display:none;">
+        <div class="started-header">
+          <span>Início em <b id="p0Display">0°C</b></span>
+          <button class="restart-link" id="restartBtn">↺ reiniciar simulação</button>
+        </div>
+
+        <div class="field" style="margin-top:10px;">
+          <label id="nextLabel">Próxima temperatura</label>
+          <div class="input-row">
+            <input type="text" id="nextTempInput" inputmode="decimal" placeholder="ex: 40" />
+            <span class="unit">°C</span>
+          </div>
+        </div>
+
+        <div class="btn-row" id="btnRowTop">
+          <button class="add-segment" id="addBtn">+ ADICIONAR PONTO</button>
+          <button class="finish-btn" id="finishBtn">FINALIZAR PONTOS</button>
+        </div>
+
+        <div id="segmentsScroll"><div id="segmentsList"></div></div>
+      </div>
+
+      <div id="summaryBanner" style="display:none;">
+        <div class="summary-banner">
+          <span>✓ Intervalos finalizados — <span id="finalCount">0</span> etapas</span>
+          <button class="edit-link" id="editBtn">editar</button>
+        </div>
+      </div>
+
+      <div id="resultsArea" style="display:none; display:flex; flex-direction:column; gap:14px;">
+        <div class="chart-wrap">
+          <div class="chart-title">Prévia da curva (interpolação linear)</div>
+          <canvas id="chart" width="740" height="360"></canvas>
+        </div>
+
+        <div class="table-wrap">
+          <table class="summary-table" id="summaryTable">
+            <thead>
+              <tr><th>Etapa</th><th>De → Para</th><th>ΔT</th><th>Duração</th><th>Taxa</th><th>Direção</th></tr>
+            </thead>
+            <tbody id="summaryTbody"></tbody>
+          </table>
+        </div>
+
+        <div class="totals">
+          <span>Duração total: <b id="totalTime">0 min</b></span>
+          <span>Etapas: <b id="totalSteps">0</b></span>
+        </div>
+
+        <button class="restart-link" id="restartBtn2" style="align-self:center;">↺ reiniciar simulação e refazer os pontos</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      <button class="btn" id="mainBtn" disabled>Finalize os intervalos para gerar o gráfico</button>
+      <p class="hint" id="hintText">Defina a temperatura inicial (P0) para começar</p>
+    </div>
+  </div>
+  <div class="frame-label">01 · Parâmetros para ensaio</div>
+</div>
+
+<script>
+  // ---- State ----
+  // segments: [{ id, temp: number, duration: number|null }]  -> P1, P2, P3...
+  let segments = [];
+  let nextId = 1;
+  let finalized = false;
+  let started = false;   // vira true assim que P0 é confirmado
+  let p0Value = 0;
+
+  const segmentsList = document.getElementById('segmentsList');
+  const addBtn = document.getElementById('addBtn');
+  const finishBtn = document.getElementById('finishBtn');
+  const editBtn = document.getElementById('editBtn');
+  const confirmP0Btn = document.getElementById('confirmP0Btn');
+  const p0Input = document.getElementById('p0Temp');
+  const p0Field = document.getElementById('p0Field');
+  const nextField = document.getElementById('nextField');
+  const p0Display = document.getElementById('p0Display');
+  const nextLabel = document.getElementById('nextLabel');
+  const nextTempInput = document.getElementById('nextTempInput');
+  const restartBtn = document.getElementById('restartBtn');
+  const restartBtn2 = document.getElementById('restartBtn2');
+  const mainBtn = document.getElementById('mainBtn');
+  const hintText = document.getElementById('hintText');
+  const subText = document.getElementById('subText');
+  const stepCount = document.getElementById('stepCount');
+  const summaryBanner = document.getElementById('summaryBanner');
+  const resultsArea = document.getElementById('resultsArea');
+  const summaryTbody = document.getElementById('summaryTbody');
+  const totalTime = document.getElementById('totalTime');
+  const totalSteps = document.getElementById('totalSteps');
+  const finalCount = document.getElementById('finalCount');
+
+  function confirmP0(){
+    const v = parseFloat(p0Input.value);
+    p0Value = (p0Input.value.trim() === '' || isNaN(v)) ? 0 : v;
+    started = true;
+
+    p0Field.style.display = 'none';
+    nextField.style.display = 'block';
+    p0Display.textContent = p0Value + '°C';
+    subText.textContent = 'Digite a próxima temperatura, adicione o ponto e informe quanto tempo leva até chegar lá.';
+    stepCount.textContent = 'P0 → P1';
+
+    render();
+    nextTempInput.focus();
+  }
+
+  function addSegment(){
+    if(finalized) return;
+    const v = parseFloat(nextTempInput.value);
+    if(nextTempInput.value.trim() === '' || isNaN(v)){
+      hintText.textContent = '⚠ Digite a próxima temperatura antes de adicionar o ponto';
+      hintText.style.color = 'var(--danger)';
+      setTimeout(()=>{ hintText.style.color = 'var(--dim)'; updateHint(); }, 2000);
+      nextTempInput.focus();
+      return;
+    }
+    segments.push({ id: nextId++, temp: v, duration: null });
+    nextTempInput.value = '';
+    render();
+    nextTempInput.focus();
+  }
+
+  function removeSegment(id){
+    if(finalized) return;
+    segments = segments.filter(s => s.id !== id);
+    render();
+  }
+
+  function classify(delta){
+    if(Math.abs(delta) < 1e-9) return {cls:'flat', label:'ESTÁVEL', arrow:'→'};
+    if(delta > 0) return {cls:'up', label:'CRESCENTE', arrow:'↑'};
+    return {cls:'down', label:'DECRESCENTE', arrow:'↓'};
+  }
+
+  function render(){
+    segmentsList.innerHTML = '';
+    let prevTemp = p0Value;
+
+    segments.forEach((seg, idx) => {
+      const pFrom = idx; // P(idx)
+      const pTo = idx + 1; // P(idx+1)
+      const wrap = document.createElement('div');
+      wrap.className = 'segment';
+
+      const delta = seg.temp - prevTemp;
+      const dt = (seg.duration !== null && !isNaN(seg.duration)) ? seg.duration : null;
+      let resultHtml = '';
+      if(dt){
+        const rate = delta / dt;
+        const info = classify(delta);
+        resultHtml = `
+          <div class="seg-result">
+            <span class="seg-badge ${info.cls}">${info.arrow} ${info.label}</span>
+            <span class="seg-rate">ΔT <b>${delta.toFixed(1)}°C</b> · <b>${Math.abs(rate).toFixed(2)}</b> °C/min</span>
+          </div>`;
+      } else {
+        const info = classify(delta);
+        resultHtml = `
+          <div class="seg-result">
+            <span class="seg-badge ${info.cls}">${info.arrow} ${info.label}</span>
+            <span class="seg-rate">ΔT <b>${delta.toFixed(1)}°C</b> · informe o tempo do trecho</span>
+          </div>`;
+      }
+
+      wrap.innerHTML = `
+        <div class="seg-label">
+          <div>
+            <div class="seg-title">Etapa ${String(pTo).padStart(2,'0')} · P${pFrom} → P${pTo}</div>
+            <div class="p-flow">De <b>${prevTemp}°C</b> até <b>${seg.temp}°C</b></div>
+          </div>
+          <button class="seg-remove" data-remove="${seg.id}">REMOVER</button>
+        </div>
+        <div class="field">
+          <label>Tempo para chegar em ${seg.temp}°C</label>
+          <div class="input-row">
+            <input type="text" inputmode="decimal" data-dur="${seg.id}" value="${seg.duration !== null ? seg.duration : ''}" placeholder="ex: 90" />
+            <span class="unit">min</span>
+          </div>
+        </div>
+        ${resultHtml}
+      `;
+      segmentsList.appendChild(wrap);
+
+      prevTemp = seg.temp;
+    });
+
+    // wire inputs
+    segmentsList.querySelectorAll('[data-dur]').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const id = parseInt(e.target.getAttribute('data-dur'));
+        const seg = segments.find(s => s.id === id);
+        const v = parseFloat(e.target.value);
+        seg.duration = e.target.value === '' ? null : (isNaN(v) ? null : v);
+        render();
+        restoreFocus(id);
+      });
+    });
+    segmentsList.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        removeSegment(parseInt(e.target.getAttribute('data-remove')));
+      });
+    });
+
+    nextLabel.textContent = segments.length ? `Próxima temperatura (após P${segments.length})` : 'Próxima temperatura';
+    stepCount.textContent = segments.length ? `P0 → P${segments.length}` : 'P0 → P1';
+    finishBtn.disabled = segments.length === 0;
+    updateHint();
+  }
+
+  function restoreFocus(id){
+    // preserves cursor after re-render triggered by input event
+    const el = segmentsList.querySelector(`[data-dur="${id}"]`);
+    if(el){ el.focus(); const val = el.value; el.setSelectionRange(val.length, val.length); }
+  }
+
+  function updateHint(){
+    if(finalized) return;
+    if(!started){
+      hintText.textContent = 'Defina a temperatura inicial (P0) para começar';
+    } else if(segments.length === 0){
+      hintText.textContent = 'Digite uma temperatura e clique em "Adicionar ponto" para começar';
+    } else {
+      const incomplete = segments.some(s => s.duration === null);
+      hintText.textContent = incomplete
+        ? 'Informe o tempo de cada trecho, ou finalize os pontos'
+        : 'Pronto — clique em "Finalizar pontos" quando terminar';
+    }
+  }
+
+  confirmP0Btn.addEventListener('click', confirmP0);
+  p0Input.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); confirmP0(); } });
+
+  addBtn.addEventListener('click', addSegment);
+  nextTempInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){ e.preventDefault(); addSegment(); }
+  });
+
+  function resetAll(){
+    segments = [];
+    nextId = 1;
+    finalized = false;
+    started = false;
+    p0Value = 0;
+    p0Input.value = '';
+    nextTempInput.value = '';
+
+    p0Field.style.display = 'block';
+    nextField.style.display = 'none';
+    summaryBanner.style.display = 'none';
+    resultsArea.style.display = 'none';
+
+    addBtn.style.display = 'flex';
+    finishBtn.style.display = 'flex';
+    segmentsList.querySelectorAll('input').forEach(i => i.removeAttribute('readonly'));
+
+    subText.textContent = 'Digite a temperatura inicial do forno para começar.';
+    stepCount.textContent = 'Ponto de partida';
+    mainBtn.disabled = true;
+    mainBtn.textContent = 'Finalize os intervalos para gerar o gráfico';
+    hintText.textContent = 'Defina a temperatura inicial (P0) para começar';
+    hintText.style.color = 'var(--dim)';
+
+    p0Input.focus();
+  }
+
+  restartBtn.addEventListener('click', resetAll);
+  restartBtn2.addEventListener('click', resetAll);
+
+  finishBtn.addEventListener('click', () => {
+    const valid = segments.length > 0 && segments.every(s => s.duration !== null && s.duration > 0);
+    if(!valid){
+      hintText.textContent = '⚠ Informe o tempo (>0) de cada trecho antes de finalizar';
+      hintText.style.color = 'var(--danger)';
+      setTimeout(()=>{ hintText.style.color = 'var(--dim)'; updateHint(); }, 2200);
+      return;
+    }
+    finalized = true;
+    addBtn.style.display = 'none';
+    finishBtn.style.display = 'none';
+    document.getElementById('nextField').querySelector('.field').style.display = 'none';
+    segmentsList.querySelectorAll('input').forEach(i => i.setAttribute('readonly', true));
+    segmentsList.querySelectorAll('.seg-remove').forEach(b => b.style.display = 'none');
+    summaryBanner.style.display = 'block';
+    finalCount.textContent = segments.length;
+    resultsArea.style.display = 'flex';
+    mainBtn.disabled = false;
+    mainBtn.textContent = 'Gerar prévia do gráfico →';
+    hintText.textContent = 'Os parâmetros definem a curva teórica na próxima tela';
+    buildSummary();
+    drawChart();
+  });
+
+  editBtn.addEventListener('click', () => {
+    finalized = false;
+    nextField.querySelector('.field').style.display = 'block';
+    addBtn.style.display = 'flex';
+    finishBtn.style.display = 'flex';
+    summaryBanner.style.display = 'none';
+    resultsArea.style.display = 'none';
+    mainBtn.disabled = true;
+    mainBtn.textContent = 'Finalize os intervalos para gerar o gráfico';
+    render();
+  });
+
+  function buildSummary(){
+    summaryTbody.innerHTML = '';
+    let prevTemp = p0Value;
+    let totTime = 0;
+    segments.forEach((seg, idx) => {
+      const pFrom = idx, pTo = idx + 1;
+      const delta = seg.temp - prevTemp;
+      const rate = delta / seg.duration;
+      const info = classify(delta);
+      totTime += seg.duration;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${String(pTo).padStart(2,'0')}</td>
+        <td>P${pFrom}→P${pTo}</td>
+        <td>${delta >= 0 ? '+' : ''}${delta.toFixed(1)}°C</td>
+        <td>${seg.duration} min</td>
+        <td>${Math.abs(rate).toFixed(2)} °C/min</td>
+        <td><span class="seg-badge ${info.cls}">${info.arrow} ${info.label}</span></td>
+      `;
+      summaryTbody.appendChild(tr);
+      prevTemp = seg.temp;
+    });
+    totalTime.textContent = totTime + ' min';
+    totalSteps.textContent = segments.length;
+  }
+
+  function drawChart(){
+    const canvas = document.getElementById('chart');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+
+    const padL = 46, padR = 16, padT = 16, padB = 34;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+
+    // Build cumulative points (cada trecho soma sua duração ao tempo anterior)
+    let points = [{ t: 0, temp: p0Value }];
+    let cumT = 0;
+    segments.forEach(seg => {
+      cumT += seg.duration;
+      points.push({ t: cumT, temp: seg.temp });
+    });
+
+    const maxT = points[points.length - 1].t || 1;
+    const temps = points.map(p => p.temp);
+    let minTemp = Math.min(0, ...temps);
+    let maxTemp = Math.max(...temps);
+    if(maxTemp === minTemp){ maxTemp += 1; minTemp -= 1; }
+    const rangePad = (maxTemp - minTemp) * 0.1;
+    minTemp -= rangePad; maxTemp += rangePad;
+
+    function X(t){ return padL + (t / maxT) * plotW; }
+    function Y(temp){ return padT + plotH - ((temp - minTemp) / (maxTemp - minTemp)) * plotH; }
+
+    // grid
+    ctx.strokeStyle = '#2b333a';
+    ctx.lineWidth = 1;
+    ctx.font = '11px JetBrains Mono, monospace';
+    ctx.fillStyle = '#7f8b93';
+    const gridLines = 5;
+    for(let i=0; i<=gridLines; i++){
+      const temp = minTemp + (maxTemp - minTemp) * (i / gridLines);
+      const y = Y(temp);
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(W - padR, y);
+      ctx.stroke();
+      ctx.fillText(Math.round(temp) + '°', 4, y + 4);
+    }
+
+    // x axis labels (time)
+    points.forEach((p, i) => {
+      const x = X(p.t);
+      ctx.fillStyle = '#7f8b93';
+      ctx.fillText(p.t + 'm', Math.max(padL, Math.min(x - 8, W - padR - 22)), H - 10);
+    });
+
+    // axis lines
+    ctx.strokeStyle = '#3a444c';
+    ctx.beginPath();
+    ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + plotH); ctx.lineTo(W - padR, padT + plotH);
+    ctx.stroke();
+
+    // curve
+    ctx.strokeStyle = '#e58a2a';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      const x = X(p.t), y = Y(p.temp);
+      if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // fill under curve
+    ctx.lineTo(X(points[points.length-1].t), Y(minTemp));
+    ctx.lineTo(X(points[0].t), Y(minTemp));
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(229,138,42,0.08)';
+    ctx.fill();
+
+    // points
+    points.forEach((p, i) => {
+      const x = X(p.t), y = Y(p.temp);
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI*2);
+      ctx.fillStyle = '#14181c';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#e58a2a';
+      ctx.stroke();
+      ctx.fillStyle = '#e7ecef';
+      ctx.font = 'bold 11px JetBrains Mono, monospace';
+      ctx.fillText('P' + i, x - 8, y - 10);
+    });
+  }
+
+  mainBtn.addEventListener('click', () => {
+    if(mainBtn.disabled) return;
+    alert('Prévia gerada! (avançar para a Tela 2 de 4)');
+  });
+
+  // init: mostra apenas o campo de P0
+  updateHint();
+  p0Input.focus();
+</script>
+</body>
+</html>
