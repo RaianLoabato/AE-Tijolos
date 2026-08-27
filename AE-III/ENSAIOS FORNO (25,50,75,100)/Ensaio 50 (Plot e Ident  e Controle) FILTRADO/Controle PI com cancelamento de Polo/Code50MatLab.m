@@ -1,0 +1,16 @@
+% Plot 1 - Temperatura
+figure(1);
+plot(tempo_s, temperatura_c, 'r-', 'LineWidth', 1.5);
+grid on;
+xlabel('Tempo (segundos)');
+ylabel('Temperatura (°C)');
+title('Aquecimento do Forno °C');
+% Informações básicas
+fprintf('Pronto!\n');
+fprintf('Tempo total: %.1f minutos\n', max(tempo_s)/60);
+fprintf('Temperatura final: %.2f °C\n', temperatura_c(end));
+%degrau = 0.50*ones (35143,1) 
+%Codigo do controle 
+s = tf('s');
+G = (0.1858/(s + 0.0001438));
+rltool(G)

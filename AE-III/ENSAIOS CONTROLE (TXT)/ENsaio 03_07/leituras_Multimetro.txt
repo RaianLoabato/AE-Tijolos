@@ -1,0 +1,8 @@
+Referencia Forno | Leitura Multimetro | Leitura forno 
+100, 120, 95.5
+150, 174, 143
+200, 240, 198
+250, 280, 240
+
+
+450, 440, 340

@@ -1,0 +1,36 @@
+tamanhoVetor = 18000; %Cortando uma parte do sinal
+plot(tempo_s(1:tamanhoVetor), temperatura_C(1:tamanhoVetor));
+fftECG = fft(temperatura_C(1:tamanhoVetor)); %FFT mostra o sinal que a gente consiga interpretar
+
+fsa = 1000;
+fz = (linspace(0,fsa,tamanhoVetor)); %Criando o eixo das frequencias
+
+%modulo da fft
+figure()
+
+
+plot(fz,abs(fftECG)/tamanhoVetor);
+%%%fdatool - ferramenta de projeto de filtro
+
+sinalFiltrado= filter(Hd,[temperatura_C; tempo_s]); %aplica convolução no filtro
+figure()
+plot(sinalFiltrado(1:tamanhoVetor,1),sinalFiltrado(1:tamanhoVetor,2));
+
+
+
+% % Plot 1 - Temperatura
+% figure(1);
+% plot(tempo_s, temperatura_C, 'r-', 'LineWidth', 1.5);
+% grid on;
+% xlabel('Tempo (segundos)');
+% ylabel('Temperatura (°C)');
+% title('Aquecimento do Forno °C');
+% 
+% %degrau = 0.25*ones(7598,1)
+% %degrau = 0.50*ones(18636,1)
+% 
+% % Informações básicas
+% fprintf('Pronto!\n');
+% fprintf('Pontos carregados: %d\n', length(tempo));
+% fprintf('Tempo total: %.1f minutos\n', max(tempo)/60);
+% fprintf('Temperatura final: %.2f °C\n', temperatura(end));
